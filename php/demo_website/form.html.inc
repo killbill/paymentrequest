@@ -68,6 +68,7 @@ be from him!
 </tr>
 
 <tr><td>&nbsp;</td><td colspan="3"><input type="checkbox" name="produce_uri" id="produce_uri"/>Produce bitcoin: URI</td></tr>
+<tr><td>&nbsp;</td><td colspan="3"><input type="checkbox" name="with_recurring_contract" id="with_recurring_contract"/>Set recurring</td></tr>
 
 <tr><td>&nbsp;</td><td colspan="3"><input type="submit" name="submit" value="Create Payment Request"/></td></tr>
 

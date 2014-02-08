@@ -215,6 +215,21 @@ function createPaymentRequest($params, &$formErrors)
 
     }
 
+    if (isset($params['with_recurring_contract'])) {
+        $dataNoContract = $paymentRequest->serialize($codec);
+        $hashNoContract = hash('ripemd128', $dataNoContract);
+        $memcache->set($hashNoContract, $dataNoContract, FALSE, 60*60*24); /* cache for 24 hours */
+
+        $paymentRecurringPaymentDetails = new \payments\RecurringPaymentDetails();
+        $paymentRecurringPaymentDetails->payment_frequency_type = \payments\PaymentFrequencyType::MONTHLY;
+        $paymentRecurringPaymentDetails->max_payment_per_period = $totalAmount*1.0e8;
+        $paymentRecurringPaymentDetails->max_payment_amount = $totalAmount*1.0e8;
+        $paymentRecurringPaymentDetails->polling_url = AbsoluteURL('')."f.php?h=".$hashNoContract;
+        $details->setSerializedRecurringPaymentDetails($paymentRecurringPaymentDetails->serialize($codec));
+        $serialized = $details->serialize($codec);
+        $paymentRequest->setSerializedPaymentDetails($serialized);
+    }
+
     $data = $paymentRequest->serialize($codec);
 
     if (isset($params['produce_uri'])) {
