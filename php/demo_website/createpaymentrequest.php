@@ -220,11 +220,19 @@ function createPaymentRequest($params, &$formErrors)
         $hashNoContract = hash('ripemd128', $dataNoContract);
         $memcache->set($hashNoContract, $dataNoContract, FALSE, 60*60*24); /* cache for 24 hours */
 
+        $contract = new \payments\RecurringPaymentContract();
+        $contract->contract_id = (string)time();
+        $contract->starts = time();
+        $contract->payment_frequency_type = \payments\PaymentFrequencyType::MONTHLY;
+        $contract->max_payment_per_period = $totalAmount*1.0e8;
+        $contract->max_payment_amount = $totalAmount*1.0e8;
+        $contract->polling_url = AbsoluteURL('')."f.php?h=".$hashNoContract;
+
         $paymentRecurringPaymentDetails = new \payments\RecurringPaymentDetails();
-        $paymentRecurringPaymentDetails->payment_frequency_type = \payments\PaymentFrequencyType::MONTHLY;
-        $paymentRecurringPaymentDetails->max_payment_per_period = $totalAmount*1.0e8;
-        $paymentRecurringPaymentDetails->max_payment_amount = $totalAmount*1.0e8;
-        $paymentRecurringPaymentDetails->polling_url = AbsoluteURL('')."f.php?h=".$hashNoContract;
+        $paymentRecurringPaymentDetails->merchant_id = 'com.ecommerce.demo';
+        $paymentRecurringPaymentDetails->subscription_id = (string)time();
+        $paymentRecurringPaymentDetails->addContracts($contract);
+
         $details->setSerializedRecurringPaymentDetails($paymentRecurringPaymentDetails->serialize($codec));
         $serialized = $details->serialize($codec);
         $paymentRequest->setSerializedPaymentDetails($serialized);
